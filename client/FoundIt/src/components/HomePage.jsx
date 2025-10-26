@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { lostAPI, foundAPI } from '../services/api';
+import ItemDetailModal from './ItemDetailModal';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,9 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [lostSearchTerm, setLostSearchTerm] = useState('');
   const [foundSearchTerm, setFoundSearchTerm] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItemType, setSelectedItemType] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -66,6 +70,28 @@ const HomePage = () => {
       return;
     }
     navigate('/add-found');
+  };
+
+  const handleItemClick = (item, type) => {
+    setSelectedItem(item);
+    setSelectedItemType(type);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+    setSelectedItemType(null);
+  };
+
+  const handleClaimItem = async (foundItemId, lostItemId) => {
+    try {
+      // This will be implemented when we add the backend API
+      console.log('Claiming item:', foundItemId, 'for lost item:', lostItemId);
+      // TODO: Implement claim API call
+    } catch (error) {
+      console.error('Error claiming item:', error);
+    }
   };
 
   if (loading) {
@@ -155,7 +181,7 @@ const HomePage = () => {
                 </div>
               ) : (
                 filteredLostItems.map((item) => (
-                  <div key={item._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div key={item._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleItemClick(item, 'lost')}>
                     <div className="flex items-start space-x-4">
                       {item.image && (
                         <img
@@ -233,7 +259,7 @@ const HomePage = () => {
                 </div>
               ) : (
                 filteredFoundItems.map((item) => (
-                  <div key={item._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div key={item._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleItemClick(item, 'found')}>
                     <div className="flex items-start space-x-4">
                       {item.image && (
                         <img
@@ -275,6 +301,15 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Item Detail Modal */}
+      <ItemDetailModal
+        item={selectedItem}
+        type={selectedItemType}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onClaimItem={handleClaimItem}
+      />
     </div>
   );
 };

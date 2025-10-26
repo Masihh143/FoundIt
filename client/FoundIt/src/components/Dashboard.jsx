@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { lostAPI } from '../services/api';
+import { lostAPI, foundAPI } from '../services/api';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [userLostItems, setUserLostItems] = useState([]);
+  const [userFoundItems, setUserFoundItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserLostItems();
+    fetchUserItems();
   }, []);
 
-  const fetchUserLostItems = async () => {
+  const fetchUserItems = async () => {
     try {
-      const response = await lostAPI.getAll();
+      const [lostResponse, foundResponse] = await Promise.all([
+        lostAPI.getAll(),
+        foundAPI.getAll(),
+      ]);
+      
       // Filter items by current user
-      const userItems = response.data.filter(item => item.user._id === user._id);
-      setUserLostItems(userItems);
+      const userLost = lostResponse.data.filter(item => item.user._id === user._id);
+      const userFound = foundResponse.data.filter(item => item.user._id === user._id);
+      
+      setUserLostItems(userLost);
+      setUserFoundItems(userFound);
     } catch (error) {
-      console.error('Error fetching user lost items:', error);
+      console.error('Error fetching user items:', error);
     } finally {
       setLoading(false);
     }
@@ -43,8 +51,12 @@ const Dashboard = () => {
     }
   };
 
-  const activeItems = userLostItems.filter(item => item.status === 'lost');
-  const resolvedItems = userLostItems.filter(item => item.status === 'found');
+  const activeLostItems = userLostItems.filter(item => item.status === 'lost');
+  const resolvedLostItems = userLostItems.filter(item => item.status === 'found');
+  const activeFoundItems = userFoundItems.filter(item => item.status === 'unclaimed');
+  const resolvedFoundItems = userFoundItems.filter(item => item.status === 'returned');
+  
+  const totalReports = userLostItems.length + userFoundItems.length;
 
   if (loading) {
     return (
@@ -125,7 +137,7 @@ const Dashboard = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Active Lost Items</p>
-                    <p className="text-2xl font-semibold text-gray-900">{activeItems.length}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{activeLostItems.length}</p>
                   </div>
                 </div>
               </div>
@@ -139,7 +151,7 @@ const Dashboard = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Resolved Items</p>
-                    <p className="text-2xl font-semibold text-gray-900">{resolvedItems.length}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{resolvedLostItems.length + resolvedFoundItems.length}</p>
                   </div>
                 </div>
               </div>
@@ -153,7 +165,7 @@ const Dashboard = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Total Reports</p>
-                    <p className="text-2xl font-semibold text-gray-900">{userLostItems.length}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{totalReports}</p>
                   </div>
                 </div>
               </div>
@@ -164,11 +176,11 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-800">Currently Active Lost Items</h2>
                 <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
-                  {activeItems.length} Active
+                  {activeLostItems.length} Active
                 </span>
               </div>
 
-              {activeItems.length === 0 ? (
+              {activeLostItems.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +193,7 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {activeItems.map((item) => (
+                  {activeLostItems.map((item) => (
                     <div key={item._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-start space-x-4">
                         {item.image && (
