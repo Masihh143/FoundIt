@@ -9,20 +9,34 @@ import Lost from "../models/lostModel.js";
  */
 export const createLostItem = async (req, res) => {
   try {
+    console.log("=== Lost Item Creation Debug ===");
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+    console.log("User ID:", req.userId);
+    
     const { itemName, description, location, dateLost } = req.body;
     if (!itemName || !description || !location || !dateLost) {
+      console.log("Missing required fields");
       return res.status(400).json({ message: "All fields are required" });
     }
 
     let imageUrl = null;
     if (req.file && req.file.buffer) {
-      const result = await uploadFile({
-        file: req.file.buffer,
-        folder: "lost_items",
-      });
-      imageUrl = result.secure_url;
+      console.log("Processing image upload...");
+      try {
+        const result = await uploadFile({
+          file: req.file.buffer,
+          folder: "lost_items",
+        });
+        imageUrl = result.secure_url;
+        console.log("Image uploaded successfully:", imageUrl);
+      } catch (uploadError) {
+        console.error("Image upload failed:", uploadError);
+        return res.status(500).json({ message: "Image upload failed" });
+      }
     }
 
+    console.log("Creating lost item in database...");
     const newItem = await Lost.create({
       itemName,
       description,
@@ -32,8 +46,10 @@ export const createLostItem = async (req, res) => {
       user: req.userId,
     });
 
+    console.log("Lost item created successfully:", newItem._id);
     res.status(201).json(newItem);
   } catch (error) {
+    console.error("Error creating lost item:", error);
     res.status(500).json({ message: error.message });
   }
 };

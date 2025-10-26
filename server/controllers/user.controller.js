@@ -10,8 +10,10 @@ import genToken from "../config/token.js";
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    // Also accept username for backward compatibility
+    const userName = name || req.body.username;
 
-    if (!name || !email || !password) {
+    if (!userName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -21,7 +23,7 @@ export const registerUser = async (req, res) => {
     }
 
     const newUser = await User.create({
-      name,
+      name: userName,
       email,
       password,
     });
