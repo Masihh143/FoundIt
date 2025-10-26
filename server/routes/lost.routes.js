@@ -5,8 +5,8 @@ import {
   getAllLostItems,
   getLostItemById,
 } from "../controllers/lost.controller.js";
-import { upload } from "../middleware/multer.js";
-import isAuth from "../middleware/isAuth.js";
+import { upload } from "../middlewares/multer.js";
+import isAuth from "../middlewares/isAuth.js";
 
 const router = express.Router();
 

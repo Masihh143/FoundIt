@@ -1,5 +1,5 @@
 // controllers/user.controller.js
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import User from "../models/userModel.js";
 import genToken from "../config/token.js";
 
@@ -9,9 +9,9 @@ import genToken from "../config/token.js";
  */
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!username || !email || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -20,19 +20,17 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = await User.create({
-      username,
+      name,
       email,
-      password: hashedPassword,
+      password,
     });
 
     const token = await genToken(newUser._id);
 
     res.status(201).json({
       _id: newUser._id,
-      username: newUser.username,
+      name: newUser.name,
       email: newUser.email,
       token,
     });
@@ -52,7 +50,7 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = await genToken(user._id);
@@ -66,7 +64,7 @@ export const loginUser = async (req, res) => {
 
     res.json({
       _id: user._id,
-      username: user.username,
+      name: user.name,
       email: user.email,
       token,
     });

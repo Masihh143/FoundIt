@@ -44,7 +44,7 @@ export const createLostItem = async (req, res) => {
  */
 export const getAllLostItems = async (req, res) => {
   try {
-    const items = await Lost.find().populate("user", "username email");
+    const items = await Lost.find().populate("user", "name email");
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -57,7 +57,7 @@ export const getAllLostItems = async (req, res) => {
  */
 export const getLostItemById = async (req, res) => {
   try {
-    const item = await Lost.findById(req.params.id).populate("user", "username email");
+    const item = await Lost.findById(req.params.id).populate("user", "name email");
     if (!item) return res.status(404).json({ message: "Item not found" });
     res.json(item);
   } catch (error) {
