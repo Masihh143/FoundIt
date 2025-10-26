@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import { configureCloudinary } from "./config/cloudinary.js";
 
 // Routes
 import userRoutes from "./routes/user.routes.js";
@@ -10,6 +11,19 @@ import lostRoutes from "./routes/lost.routes.js";
 import foundRoutes from "./routes/found.routes.js";
 
 dotenv.config();
+
+// Test environment variables
+console.log("=== Environment Variables Test ===");
+console.log("CLOUD_NAME:", process.env.CLOUD_NAME);
+console.log("CLOUD_API_KEY:", process.env.CLOUD_API_KEY);
+console.log("CLOUD_API_SECRET:", process.env.CLOUD_API_SECRET);
+console.log("JWT_SECRET:", process.env.JWT_SECRET ? "SET" : "NOT SET");
+console.log("dbUrl:", process.env.dbUrl ? "SET" : "NOT SET");
+console.log("==================================");
+
+// Configure Cloudinary after environment variables are loaded
+configureCloudinary();
+
 connectDB();
 
 const app = express();

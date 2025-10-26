@@ -23,16 +23,29 @@ export const createLostItem = async (req, res) => {
     let imageUrl = null;
     if (req.file && req.file.buffer) {
       console.log("Processing image upload...");
-      try {
-        const result = await uploadFile({
-          file: req.file.buffer,
-          folder: "lost_items",
-        });
-        imageUrl = result.secure_url;
-        console.log("Image uploaded successfully:", imageUrl);
-      } catch (uploadError) {
-        console.error("Image upload failed:", uploadError);
-        return res.status(500).json({ message: "Image upload failed" });
+      console.log("Cloudinary config check:");
+      console.log("CLOUD_NAME:", process.env.CLOUD_NAME ? "SET" : "NOT SET");
+      console.log("CLOUD_API_KEY:", process.env.CLOUD_API_KEY ? "SET" : "NOT SET");
+      console.log("CLOUD_API_SECRET:", process.env.CLOUD_API_SECRET ? "SET" : "NOT SET");
+      
+      // Check if Cloudinary is configured
+      if (!process.env.CLOUD_NAME || !process.env.CLOUD_API_KEY || !process.env.CLOUD_API_SECRET) {
+        console.log("Cloudinary not configured, skipping image upload");
+        // Continue without image upload
+      } else {
+        try {
+          console.log("Attempting Cloudinary upload...");
+          const result = await uploadFile({
+            file: req.file.buffer,
+            folder: "lost_items",
+          });
+          imageUrl = result.secure_url;
+          console.log("Image uploaded successfully:", imageUrl);
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          console.error("Upload error details:", uploadError.message);
+          return res.status(500).json({ message: "Image upload failed: " + uploadError.message });
+        }
       }
     }
 

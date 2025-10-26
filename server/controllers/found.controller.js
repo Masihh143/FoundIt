@@ -16,11 +16,25 @@ export const createFoundItem = async (req, res) => {
 
     let imageUrl = null;
     if (req.file && req.file.buffer) {
-      const result = await uploadFile({
-        file: req.file.buffer,
-        folder: "found_items",
-      });
-      imageUrl = result.secure_url;
+      console.log("Processing image upload...");
+      
+      // Check if Cloudinary is configured
+      if (!process.env.CLOUD_NAME || !process.env.CLOUD_API_KEY || !process.env.CLOUD_API_SECRET) {
+        console.log("Cloudinary not configured, skipping image upload");
+        // Continue without image upload
+      } else {
+        try {
+          const result = await uploadFile({
+            file: req.file.buffer,
+            folder: "found_items",
+          });
+          imageUrl = result.secure_url;
+          console.log("Image uploaded successfully:", imageUrl);
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          return res.status(500).json({ message: "Image upload failed" });
+        }
+      }
     }
 
     const newItem = await Found.create({
