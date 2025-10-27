@@ -57,7 +57,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.resolve(__dirname, "../client/foundIt/dist");
+  const frontendPath = path.resolve(__dirname, "../client/FoundIt/dist");
   app.use(express.static(frontendPath));
 
   app.use((req, res) => {
