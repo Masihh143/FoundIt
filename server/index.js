@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import { configureCloudinary } from "./config/cloudinary.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Routes
 import userRoutes from "./routes/user.routes.js";
@@ -50,6 +52,19 @@ app.use("/api/found", foundRoutes);
 app.get("/", (req, res) => {
   res.send("✅ FoundIt API is running...");
 });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV === "production") {
+  const frontendPath = path.resolve(__dirname, "../client/foundIt/dist");
+  app.use(express.static(frontendPath));
+
+  // Send index.html for all unknown routes (for React Router)
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
+}
 
 // Start server
 const PORT = process.env.PORT || 5000;

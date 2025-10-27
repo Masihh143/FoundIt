@@ -1,0 +1,12 @@
+{
+    "name": "foundit-root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "install-client": "cd client/FoundIt && npm install",
+      "install-server": "cd server && npm install",
+      "build": "cd client/FoundIt && npm run build",
+      "start": "cd server && node index.js"
+    }
+  }
+  
