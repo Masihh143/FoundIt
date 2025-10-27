@@ -60,8 +60,7 @@ if (process.env.NODE_ENV === "production") {
   const frontendPath = path.resolve(__dirname, "../client/foundIt/dist");
   app.use(express.static(frontendPath));
 
-  // Send index.html for all unknown routes (for React Router)
-  app.all("/.*/", (req, res) => {
+  app.use((req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
