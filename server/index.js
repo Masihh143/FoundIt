@@ -61,7 +61,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(frontendPath));
 
   // Send index.html for all unknown routes (for React Router)
-  app.all("/*", (req, res) => {
+  app.all("/.*/", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
