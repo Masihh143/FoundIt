@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import api, { lostAPI } from '../services/api';
 
 const ItemDetailModal = ({ item, type, isOpen, onClose, onClaimItem }) => {
   const { user } = useAuth();
@@ -21,8 +22,8 @@ const ItemDetailModal = ({ item, type, isOpen, onClose, onClaimItem }) => {
     if (type === 'found' && user) {
       // Fetch user's lost items for selection
       try {
-        const response = await fetch('http://localhost:5000/api/lost');
-        const allLostItems = await response.json();
+        const response = await lostAPI.getAll();
+        const allLostItems = response.data;
         const userItems = allLostItems.filter(lostItem => 
           lostItem.user._id === user._id && lostItem.status === 'lost'
         );
@@ -45,15 +46,9 @@ const ItemDetailModal = ({ item, type, isOpen, onClose, onClaimItem }) => {
   const handleCloseLostItem = async () => {
     if (type === 'lost' && user && item.user._id === user._id) {
       try {
-        const response = await fetch(`http://localhost:5000/api/lost/${item._id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await api.patch(`/lost/${item._id}/close`);
         
-        if (response.ok) {
+        if (response.status === 200) {
           onClose();
           // Refresh the page or update the list
           window.location.reload();
