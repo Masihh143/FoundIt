@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import { configureCloudinary } from "./config/cloudinary.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Routes
 import userRoutes from "./routes/user.routes.js";
@@ -34,10 +36,14 @@ app.use(express.json({ limit: "10mb" })); // Parse JSON requests
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS setup (adjust origin for your frontend)
+// CORS: allow same-origin in production; use CLIENT_URL in dev
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (process.env.NODE_ENV === "production") return cb(null, true);
+      return cb(null, origin === process.env.CLIENT_URL);
+    },
     credentials: true,
   })
 );
@@ -48,9 +54,20 @@ app.use("/api/lost", lostRoutes);
 app.use("/api/found", foundRoutes);
 app.use("/api/claims", claimRoutes);
 
-// Health check route
+// Serve frontend in production
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDistPath = path.resolve(__dirname, "../client/FoundIt/dist");
+
+app.use(express.static(clientDistPath));
+
+// Health check and SPA fallback
 app.get("/", (req, res) => {
-  res.send("✅ FoundIt API is running...");
+  res.sendFile(path.join(clientDistPath, "index.html"));
+});
+
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
 // Start server
