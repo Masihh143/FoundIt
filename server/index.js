@@ -36,25 +36,48 @@ app.use(express.json({ limit: "10mb" })); // Parse JSON requests
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS: allow same-origin in production; use CLIENT_URL in dev
+// ==============================
+// ✅ CORS Configuration
+// ==============================
+//
+// - Allows local frontend (http://localhost:5173) during development
+// - Allows deployed frontend on Render (https://foundit-3180.onrender.com)
+// - Blocks all other origins for safety
+// - Works with credentials (cookies, tokens, etc.)
+//
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://foundit-3180.onrender.com",
+];
+
 app.use(
   cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (process.env.NODE_ENV === "production") return cb(null, true);
-      return cb(null, origin === process.env.CLIENT_URL);
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.warn(`❌ CORS blocked request from origin: ${origin}`);
+        return callback(new Error("Not allowed by CORS"));
+      }
     },
     credentials: true,
   })
 );
 
+// ==============================
 // API Routes
+// ==============================
 app.use("/api/user", userRoutes);
 app.use("/api/lost", lostRoutes);
 app.use("/api/found", foundRoutes);
 app.use("/api/claims", claimRoutes);
 
-// Serve frontend in production
+// ==============================
+// Serve Frontend in Production
+// ==============================
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDistPath = path.resolve(__dirname, "../client/FoundIt/dist");
 
@@ -70,6 +93,8 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
-// Start server
+// ==============================
+// Start Server
+// ==============================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
