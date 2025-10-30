@@ -65,8 +65,8 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
-app.get("*", (req, res, next) => {
-  if (req.path.startsWith("/api")) return next();
+// SPA fallback for any non-API route (Express 5-compatible)
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
