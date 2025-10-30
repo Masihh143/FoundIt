@@ -4,6 +4,7 @@ import {
   createLostItem,
   getAllLostItems,
   getLostItemById,
+  closeLostItem,
 } from "../controllers/lost.controller.js";
 import { upload } from "../middlewares/multer.js";
 import isAuth from "../middlewares/isAuth.js";
@@ -16,5 +17,6 @@ router.get("/:id", getLostItemById);
 
 // Protected (requires login)
 router.post("/add", isAuth, upload.single("image"), createLostItem);
+router.patch("/:id/close", isAuth, closeLostItem);
 
 export default router;

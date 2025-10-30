@@ -4,6 +4,7 @@ import {
   createFoundItem,
   getAllFoundItems,
   getFoundItemById,
+  claimFoundItem,
 } from "../controllers/found.controller.js";
 import { upload } from "../middlewares/multer.js";
 import isAuth from "../middlewares/isAuth.js";
@@ -16,5 +17,6 @@ router.get("/:id", getFoundItemById);
 
 // Protected (requires login)
 router.post("/add", isAuth, upload.single("image"), createFoundItem);
+router.post("/:id/claim", isAuth, claimFoundItem);
 
 export default router;

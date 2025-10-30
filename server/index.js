@@ -4,13 +4,12 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import { configureCloudinary } from "./config/cloudinary.js";
-import path from "path";
-import { fileURLToPath } from "url";
 
 // Routes
 import userRoutes from "./routes/user.routes.js";
 import lostRoutes from "./routes/lost.routes.js";
 import foundRoutes from "./routes/found.routes.js";
+import claimRoutes from "./routes/claims.routes.js";
 
 dotenv.config();
 
@@ -47,23 +46,12 @@ app.use(
 app.use("/api/user", userRoutes);
 app.use("/api/lost", lostRoutes);
 app.use("/api/found", foundRoutes);
+app.use("/api/claims", claimRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
   res.send("✅ FoundIt API is running...");
 });
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.resolve(__dirname, "../client/FoundIt/dist");
-  app.use(express.static(frontendPath));
-
-  app.use((req, res) => {
-    res.sendFile(path.join(frontendPath, "index.html"));
-  });
-}
 
 // Start server
 const PORT = process.env.PORT || 5000;

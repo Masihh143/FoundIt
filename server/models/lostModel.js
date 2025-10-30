@@ -31,6 +31,17 @@ const lostSchema = mongoose.Schema(
       enum: ["lost", "found"],
       default: "lost",
     },
+    matchedFound: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Found",
+    },
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    resolvedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

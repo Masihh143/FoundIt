@@ -93,3 +93,28 @@ export const getLostItemById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * @desc Close a lost item (owner only)
+ * @route PATCH /api/lost/:id/close
+ * @access Private
+ */
+export const closeLostItem = async (req, res) => {
+  try {
+    const item = await Lost.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    if (item.user.toString() !== req.userId) {
+      return res.status(403).json({ message: "Not authorized to close this item" });
+    }
+
+    item.status = "found"; // mark as resolved/closed
+    item.resolvedBy = req.userId;
+    item.resolvedAt = new Date();
+    await item.save();
+
+    res.json({ message: "Lost item closed", item });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
